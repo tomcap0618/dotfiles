@@ -3,8 +3,6 @@
 "clang-format
 "black
 
-let g:python3_host_prog=$PYTHON_PATH
-
 set nocompatible "Disable VI compatibility. This is required for some commands.
 
 "Vim-Plug Auto-Install
@@ -26,14 +24,14 @@ call plug#begin()
 Plug 'tpope/vim-sensible'
 Plug 'tpope/vim-commentary' "Add comment with 'gcc' || 'gc<motion>'
 Plug 'tpope/vim-surround' "Add 's' surround text object
-Plug 'tpope/vim-unimpaired' "Add '[' and ']' operations for pair mappings
+"Plug 'tpope/vim-unimpaired' "Add '[' and ']' operations for pair mappings
 Plug 'tpope/vim-repeat' "Add additional '.' operations
 Plug 'tpope/vim-endwise' "Automatically adds end statements
 Plug 'tpope/vim-speeddating' "<C-A> and <C-X> understand dates
 Plug 'tpope/vim-vinegar' "<-> to open netrw
 
 "Plug 'tpope/vim-fugitive' "Git integration
-"Plug 'tpope/vim-dispatch' "TODO: Asynchronous build/test commands
+Plug 'tpope/vim-dispatch' "TODO: Asynchronous build/test commands
 
 Plug 'junegunn/vim-easy-align' "Add 'EasyAlign' command
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
@@ -175,9 +173,8 @@ let g:ale_c_parse_compile_commands = 1
 
 "Deoplete
 let g:deoplete#enable_at_startup = 1
-"Tab Forward Cycle
-inoremap <silent><expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
-"Tab Backward Cycle
-inoremap <silent><expr><s-tab> pumvisible() ? "\<c-p>" : "\<s-tab>"
+imap <C-k>     <Plug>(neosnippet_expand_or_jump)
+smap <C-k>     <Plug>(neosnippet_expand_or_jump)
+xmap <C-k>     <Plug>(neosnippet_expand_target)
 " Close the documentation window when completion is done
 autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
