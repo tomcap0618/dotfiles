@@ -1,80 +1,112 @@
-"Pathogen
-let g:pathogen_disabled = []
-"call add(g:pathogen_disabled, 'ctrlp')
-"call add(g:pathogen_disabled, 'hardmode')
-"call add(g:pathogen_disabled, 'nerdtree')
-"call add(g:pathogen_disabled, 'supertab')
-"call add(g:pathogen_disabled, 'tabular')
-"call add(g:pathogen_disabled, 'tlib_vim')
-"call add(g:pathogen_disabled, 'vim-addon-mw-utils')
-"call add(g:pathogen_disabled, 'vim-airline-themes')
-"call add(g:pathogen_disabled, 'vim-airline')
-"call add(g:pathogen_disabled, 'vim-colors-solarized')
-"call add(g:pathogen_disabled, 'vim-repeat')
-"call add(g:pathogen_disabled, 'vim-sensible')
-"call add(g:pathogen_disabled, 'vim-snipmate')
-"call add(g:pathogen_disabled, 'vim-snippets')
-"call add(g:pathogen_disabled, 'vim-surround')
-call pathogen#infect()
-call pathogen#helptags()
+"Requirements:
+"pip3 install pynvim neovim
+"bear for clangd
+"clang-format
+"black
 
-"Turn Off Bell
-set visualbell
-set t_vb=
+set nocompatible "Disable VI compatibility. This is required for some commands.
 
-syntax on
+"Vim-Plug Auto-Install
+if has('nvim')
+    let plug_path = '~/.local/share/nvim/site/autoload/plug.vim'
+else
+    let plug_path = '~/.vim/autoload/plug.vim'
+endif
+
+if empty(glob(plug_path))
+    "Requires curl installation
+    execute "silent !curl -fLo " plug_path " --create-dirs "
+                \ "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
+    autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
+call plug#begin()
+
+Plug 'morhetz/gruvbox'
+
+Plug 'tpope/vim-sensible'
+Plug 'tpope/vim-commentary' "Add comment with 'gcc' || 'gc<motion>'
+Plug 'tpope/vim-surround' "Add 's' surround text object
+"Plug 'tpope/vim-unimpaired' "Add '[' and ']' operations for pair mappings
+Plug 'tpope/vim-repeat' "Add additional '.' operations
+Plug 'tpope/vim-endwise' "Automatically adds end statements
+Plug 'tpope/vim-speeddating' "<C-A> and <C-X> understand dates
+Plug 'tpope/vim-vinegar' "<-> to open netrw
+
+"Plug 'tpope/vim-fugitive' "Git integration
+Plug 'tpope/vim-dispatch' "TODO: Asynchronous build/test commands
+
+Plug 'junegunn/vim-easy-align' "Add 'EasyAlign' command
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'junegunn/fzf.vim'
+
+Plug 'nathanaelkane/vim-indent-guides'
+
+Plug 'dense-analysis/ale'
+let g:ale_fixers = {
+            \   'python': ['black'],
+            \   'c': ['clang-format'],
+            \   '*': ['remove_trailing_lines', 'trim_whitespace'],
+            \}
+
+if has('nvim')
+    Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+else
+    Plug 'roxma/nvim-yarp' "Neovim to Vim Plugin Support
+    Plug 'roxma/vim-hug-neovim-rpc' "Neovim to Vim Plugin Support
+    Plug 'Shougo/deoplete.nvim'
+endif
+
+Plug 'Shougo/neosnippet.vim'
+Plug 'Shougo/neosnippet-snippets'
+
+" Automatically install missing Vim-Plug plugins on startup
+if !empty(filter(copy(g:plugs), '!isdirectory(v:val.dir)'))
+    autocmd VimEnter * PlugInstall --sync |q | source $MYVIMRC
+endif
+
+call plug#end()
+
 filetype plugin indent on
+syntax enable
 
-"Escape Insert Mode
-imap jj <ESC>
-imap JJ <ESC>
-imap jk <ESC>
-imap JK <ESC>
-imap KJ <ESC>
-imap kj <ESC>
+set termguicolors
+colorscheme gruvbox
 
-"Tab Navigation
-nnoremap <Tab> :bnext<CR>
-nnoremap <S-Tab> :bprevious<CR>
+set history=1024
+set lazyredraw
+set nosmartindent
+set showcmd
 
 "File Formats
 set encoding=utf-8
-set fileformat=unix
-
-
-set history=5000
 
 set tabstop=4
 set softtabstop=4
 set shiftwidth=4
 set expandtab
-set autoindent
-set nosmartindent
+set fileformat=unix
 
-"Hybrid Line Numbers
-set number relativenumber
-set nu rnu
+"Highlight closing symbol
+set showmatch
 
-"Absolute Line Numbers
-"set number
-"set nu
+"Line Numbers
+set number
+set relativenumber
 
 "Highlight Selected Line
 set cursorline
 
-set lazyredraw
-set showmatch
+"Search
 set incsearch
 set hlsearch
+set ignorecase
+set smartcase
 
 "Folding
 set foldmethod=indent
-set foldnestmax=10
-set nofoldenable
-set foldlevel=1
+set foldlevel=99
 set foldcolumn=1
-set foldlevelstart=10
-nnoremap <space> za
 
 set mouse=a
 set hidden
@@ -93,46 +125,48 @@ set wildignore+=*__pycache__*,*.pyc " Python
 set wildignore+=*.png " Image Files
 set wildignore+=*.pdf " Image Files
 
-set showcmd
-set hlsearch
-set ignorecase
-set smartcase
+nnoremap <Space> <Nop>
+let mapleader="\<Space>"
 
-set nostartofline
+nmap <Leader>c :pclose<CR>
+nmap <Leader>v :source $MYVIMRC<CR>
 
-"NERDTree
-map <C-n> :NERDTreeToggle<CR>
-let NERDTreeRespectWildIgnore=1
-let g:NERDTreeDirArrowExpandable = '+'
-let g:NERDTreeDirArrowCollapsible = '-'
-let g:NERDTreeWinSize=70
+"fzf.vim key mappings
+nnoremap <C-P> :Files<CR>
+
+"Format key mappings
+nmap <Leader>f :ALEFix<CR>
+nmap <Leader>h :ALEHover<CR>
+nmap <Leader>h :ALEHover<CR>
+nmap <Leader>h :ALEHover<CR>
+nmap <Leader>d :ALEGoToDefinition<CR>
+nmap <Leader>d :ALEGoToDefinition<CR>
+nmap <Leader>dh :ALEGoToDefinitionInSplit<CR>
+nmap <Leader>dv :ALEGoToDefinitionInVSplit<CR>
+nmap <Leader>dt :ALEGoToTypeDefinition<CR>
+nmap <Leader>dth :ALEGoToTypeDefinitionInSplit<CR>
+nmap <Leader>dtv :ALEGoToTypeDefinitionInVSplit<CR>
+nmap <Leader>r :ALEFindReferences<CR>
 
 "netrw
 let g:netrw_banner=0
 
-"Airline
-let g:airline#extensions#tabline#enabled=1
-let g:airline_solarized_bg='light'
+"Indent Guides
+let g:indent_guides_enable_on_vim_startup=1
 
-"Hardmode
-let g:HardMode_level = 'wannabe' "If set, disables arrow keys.
-autocmd VimEnter,BufNewFile,BufReadPost * silent! call HardMode()
+"ALE
+let g:ale_sign_error = '>'
+let g:ale_sign_warning = '^'
+let g:ale_warn_about_trailing_whitespace = 0
+let g:ale_code_actions_enabled = 1
+let g:ale_lint_on_text_changed = 'normal'
+let g:ale_lint_on_insert_leave = 1
+let g:ale_c_parse_compile_commands = 1
 
-"Colorscheme
-let g:solarized_termcolors=256
-colorscheme solarized
-
-"GVIM
-if has("gui_running")
-	set lines=80 columns=120
-    set background=light
-else
-    set background=dark
-endif
-
-"Windows
-if has('win32')
-	set guifont=Consolas:h11:cANSI
-"*NIX
-else
-endif
+"Deoplete
+let g:deoplete#enable_at_startup = 1
+imap <C-k>     <Plug>(neosnippet_expand_or_jump)
+smap <C-k>     <Plug>(neosnippet_expand_or_jump)
+xmap <C-k>     <Plug>(neosnippet_expand_target)
+" Close the documentation window when completion is done
+autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
