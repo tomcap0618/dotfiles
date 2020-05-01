@@ -26,6 +26,7 @@ Plug 'morhetz/gruvbox'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#buffer_nr_show = 1
 
 Plug 'tpope/vim-sensible'
 Plug 'tpope/vim-commentary' "Add comment with 'gcc' || 'gc<motion>'
