@@ -76,6 +76,7 @@ syntax enable
 
 set termguicolors
 colorscheme gruvbox
+set clipboard=unnamed
 
 set history=1024
 set lazyredraw
