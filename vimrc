@@ -1,9 +1,3 @@
-"Requirements:
-"pip3 install pynvim neovim
-"bear for clangd
-"clang-format
-"black
-
 set nocompatible "Disable VI compatibility. This is required for some commands.
 
 "Vim-Plug Auto-Install
@@ -16,26 +10,20 @@ endif
 if empty(glob(plug_path))
     "Requires curl installation
     execute "silent !curl -fLo " plug_path " --create-dirs "
-                \ "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
+        \ "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
     autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
 call plug#begin()
 
-Plug 'morhetz/gruvbox'
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
-let g:airline#extensions#tabline#enabled = 1
-let g:airline#extensions#tabline#buffer_nr_show = 1
-
 Plug 'tpope/vim-sensible'
 Plug 'tpope/vim-commentary' "Add comment with 'gcc' || 'gc<motion>'
 Plug 'tpope/vim-surround' "Add 's' surround text object
-"Plug 'tpope/vim-unimpaired' "Add '[' and ']' operations for pair mappings
+Plug 'tpope/vim-unimpaired' "Add '[' and ']' operations for pair mappings
 Plug 'tpope/vim-repeat' "Add additional '.' operations
 Plug 'tpope/vim-endwise' "Automatically adds end statements
 Plug 'tpope/vim-speeddating' "<C-A> and <C-X> understand dates
-Plug 'tpope/vim-vinegar' "<-> to open netrw
+Plug 'tpope/vim-vinegar'
 
 "Plug 'tpope/vim-fugitive' "Git integration
 Plug 'tpope/vim-dispatch' "TODO: Asynchronous build/test commands
@@ -44,22 +32,56 @@ Plug 'junegunn/vim-easy-align' "Add 'EasyAlign' command
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 
-Plug 'nathanaelkane/vim-indent-guides'
+"fzf.vim key mappings
+nmap <Leader>F :Files<CR>
+nmap <Leader>b :Buffers<CR>
+nmap <Leader>h :History<CR>
 
 Plug 'dense-analysis/ale'
-let g:ale_fixers = {
-            \   'python': ['black'],
-            \   'c': ['clang-format'],
-            \   '*': ['remove_trailing_lines', 'trim_whitespace'],
+let g:ale_sign_error = '>'
+let g:ale_sign_warning = '^'
+let g:ale_warn_about_trailing_whitespace = 0
+let g:ale_code_actions_enabled = 1
+let g:ale_sign_column_always = 1
+let g:ale_lint_on_text_changed = 'normal'
+let g:ale_lint_on_insert_leave = 1
+let g:ale_linters = {
+            \   'cpp': ['clangtidy'],
+            \   'c': ['clangtidy'],
             \}
+let g:ale_cpp_clangtidy_checks = []
+let g:ale_cpp_clangtidy_executable = 'clang-tidy'
+let g:ale_cpp_clangtidy_options = ''
+let g:ale_cpp_clangtidy_extra_options = ''
+let g:ale_c_parse_compile_commands = 1
+" Use newer clang versions where available.
+" if executable('clang-6.0')
+"     let g:ale_c_clang_executable = 'clang-6.0'
+"     let g:ale_cpp_clang_executable = 'clang-6.0'
+" endif
+" if executable('clangd-6.0')
+"     let g:ale_c_clangd_executable = 'clangd-6.0'
+"     let g:ale_cpp_clangd_executable = 'clangd-6.0'
+" endif
+" if executable('clangd-8')
+"     let g:ale_c_clangd_executable = 'clangd-8'
+"     let g:ale_cpp_clangd_executable = 'clangd-8'
+" endif
 
 if has('nvim')
-    Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 else
-    Plug 'roxma/nvim-yarp' "Neovim to Vim Plugin Support
-    Plug 'roxma/vim-hug-neovim-rpc' "Neovim to Vim Plugin Support
-    Plug 'Shougo/deoplete.nvim'
+  Plug 'roxma/nvim-yarp' "Neovim to Vim Plugin Support
+  Plug 'roxma/vim-hug-neovim-rpc' "Neovim to Vim Plugin Support
+  Plug 'Shougo/deoplete.nvim'
 endif
+let g:deoplete#enable_at_startup = 1
+"Tab Forward Cycle
+inoremap <silent><expr><tab> pumvisible() ? "\<c-n>" : "\<tab>"
+"Tab Backward Cycle
+inoremap <silent><expr><s-tab> pumvisible() ? "\<c-p>" : "\<s-tab>"
+" Close the documentation window when completion is done
+autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
 
 Plug 'Shougo/neosnippet.vim'
 Plug 'Shougo/neosnippet-snippets'
@@ -74,9 +96,12 @@ call plug#end()
 filetype plugin indent on
 syntax enable
 
-set termguicolors
-colorscheme gruvbox
-set clipboard=unnamed
+"netrw
+let g:netrw_banner=0
+
+let mapleader="\<Space>"
+"jk to escape
+inoremap jk <ESC> "jk to escape
 
 set history=1024
 set lazyredraw
@@ -91,6 +116,25 @@ set softtabstop=4
 set shiftwidth=4
 set expandtab
 set fileformat=unix
+
+"Python PEP format
+au BufNewFile,BufRead *.py set
+    \ tabstop=4
+    \ softtabstop=4
+    \ shiftwidth=4
+    \ textwidth=79
+    \ expandtab
+    \ autoindent
+    \ fileformat=unix
+
+au BufNewFile,BufRead *.c, *.cpp, *.h, *.hpp set
+    \ tabstop=2
+    \ softtabstop=2
+    \ shiftwidth=2
+    \ textwidth=80
+    \ expandtab
+    \ wrap
+    \ fileformat=unix
 
 "Highlight closing symbol
 set showmatch
@@ -130,48 +174,3 @@ set wildignore+=*__pycache__*,*.pyc " Python
 set wildignore+=*.png " Image Files
 set wildignore+=*.pdf " Image Files
 
-nnoremap <Space> <Nop>
-let mapleader="\<Space>"
-
-nmap <Leader>c :pclose<CR>
-nmap <Leader>v :source $MYVIMRC<CR>
-
-"fzf.vim key mappings
-nnoremap <C-P> :Files<CR>
-
-"Format key mappings
-nmap <Leader>f :ALEFix<CR>
-nmap <Leader>h :ALEHover<CR>
-nmap <Leader>h :ALEHover<CR>
-nmap <Leader>h :ALEHover<CR>
-nmap <Leader>d :ALEGoToDefinition<CR>
-nmap <Leader>d :ALEGoToDefinition<CR>
-nmap <Leader>dh :ALEGoToDefinitionInSplit<CR>
-nmap <Leader>dv :ALEGoToDefinitionInVSplit<CR>
-nmap <Leader>dt :ALEGoToTypeDefinition<CR>
-nmap <Leader>dth :ALEGoToTypeDefinitionInSplit<CR>
-nmap <Leader>dtv :ALEGoToTypeDefinitionInVSplit<CR>
-nmap <Leader>r :ALEFindReferences<CR>
-
-"netrw
-let g:netrw_banner=0
-
-"Indent Guides
-let g:indent_guides_enable_on_vim_startup=1
-
-"ALE
-let g:ale_sign_error = '>'
-let g:ale_sign_warning = '^'
-let g:ale_warn_about_trailing_whitespace = 0
-let g:ale_code_actions_enabled = 1
-let g:ale_lint_on_text_changed = 'normal'
-let g:ale_lint_on_insert_leave = 1
-let g:ale_c_parse_compile_commands = 1
-
-"Deoplete
-let g:deoplete#enable_at_startup = 1
-imap <C-k>     <Plug>(neosnippet_expand_or_jump)
-smap <C-k>     <Plug>(neosnippet_expand_or_jump)
-xmap <C-k>     <Plug>(neosnippet_expand_target)
-" Close the documentation window when completion is done
-autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
